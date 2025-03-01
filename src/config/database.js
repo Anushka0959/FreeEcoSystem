@@ -1,26 +1,26 @@
-const mongoose = require('mongoose');
-const config = require('./config');
+const mongoose = require("mongoose");
+require("dotenv").config(); // Load environment variables
+
+console.log("🔍 MONGODB_URI:", process.env.MONGODB_URI); // Debugging Line
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(config.mongoUri, {
+    if (!process.env.MONGODB_URI) {
+      throw new Error("❌ MONGODB_URI is not defined in .env file!");
+    }
+
+    console.log("🔄 Connecting to MongoDB...");
+
+    const conn = await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-    });
-    
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
-    
-    // Handle MongoDB connection errors
-    mongoose.connection.on('error', (err) => {
-      console.error(`MongoDB connection error: ${err}`);
+      serverSelectionTimeoutMS: 10000, // Increase timeout
     });
 
-    mongoose.connection.on('disconnected', () => {
-      console.log('MongoDB disconnected');
-    });
+    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
 
   } catch (error) {
-    console.error(`Error: ${error.message}`);
+    console.error(`❌ Connection Failed: ${error.message}`);
     process.exit(1);
   }
 };
